@@ -1,0 +1,81 @@
+---
+/**
+ * Station pictograms — authored for this line.
+ *
+ * One stroke weight and round caps, matched to the 2px lucide set the Develar
+ * dashboard draws with, so an icon here and an icon there read as one family.
+ * Geometry stays on 45°/90° runs and the line's own circular nodes.
+ */
+interface Props {
+  name: string;
+  class?: string;
+  size?: number;
+}
+
+const { name, class: className = "", size = 32 } = Astro.props;
+
+const PATHS: Record<string, string[]> = {
+  // The click leaves the ad carrying identity.
+  anuncio: ["M4 6 H22 V20 H4 Z", "M22 20 L28 26", "M23 26 H28 V21"],
+  // A page whose job is to issue a journey, not to store a row.
+  landing: ["M6 4 H26 V28 H6 Z", "M6 11 H26", "M11 17 H21 V24 H11 Z"],
+  // The ticket, notched on both edges, perforated down its stub.
+  boleto: [
+    "M4 9 H28 V13 A3 3 0 0 0 28 19 V23 H4 V19 A3 3 0 0 0 4 13 Z",
+    "M21 11 V21",
+  ],
+  // Three levels of number selection, cut at the line's own angle.
+  ruteo: ["M3 16 H12", "M12 16 L19 9 H29", "M12 16 H29", "M12 16 L19 23 H29"],
+  // The conversation itself — the mark's own bubble, reduced to one weight.
+  whatsapp: ["M5 6 H27 V21 H16 L10 27 V21 H5 Z"],
+  // A fare gate: two posts and the mark that says the code was good.
+  validacion: ["M4 8 V24", "M28 8 V24", "M11 16 L15 20 L23 11"],
+  // Cash in: the deposit dropping into the drawer.
+  caja: ["M12 3 H20 V9 H12 Z", "M16 9 V12", "M4 12 H28 V26 H4 Z", "M12 19 H20"],
+  // The round trip closing: out to Meta, and the confirmation back.
+  capi: [
+    "M4 11 H28",
+    "M24 7 L28 11 L24 15",
+    "M28 21 H4",
+    "M8 17 L4 21 L8 25",
+  ],
+  // The operations board the line is run from.
+  sala: ["M3 6 H29 V24 H3 Z", "M8 12 H24", "M8 17 H18", "M13 24 V28", "M19 24 V28"],
+  // Plant: two racks on one machine.
+  infra: ["M5 4 H27 V13 H5 Z", "M5 17 H27 V26 H5 Z", "M9 8 H12", "M9 21 H12"],
+  // A person on shift — the agent, not a till.
+  agente: ["M16 6 m-5 0 a5 5 0 1 0 10 0 a5 5 0 1 0 -10 0", "M6 27 a10 10 0 0 1 20 0"],
+  // A contact record with its history: the CRM.
+  crm: ["M4 6 H28 V26 H4 Z", "M4 12 H28", "M10 18 H22", "M10 22 H18", "M9 9 h2"],
+  // A browser window — the site that feeds the line.
+  web: ["M3 6 H29 V26 H3 Z", "M3 12 H29", "M7 9 h1.5", "M11 9 h1.5", "M15 9 h1.5"],
+  // Numbers that add up: reporting.
+  reporte: ["M4 27 V5", "M4 27 H28", "M9 27 V18", "M15 27 V11", "M21 27 V15", "M27 27 V8"],
+};
+
+const paths = PATHS[name] ?? [];
+const dashed = name === "boleto";
+---
+
+<svg
+  class={className}
+  width={size}
+  height={size}
+  viewBox="0 0 32 32"
+  fill="none"
+  stroke="currentColor"
+  stroke-width="2"
+  stroke-linecap="round"
+  stroke-linejoin="round"
+  aria-hidden="true"
+  focusable="false"
+>
+  {
+    paths.map((d, i) => (
+      <path
+        d={d}
+        stroke-dasharray={dashed && i === 1 ? "2 3" : undefined}
+      />
+    ))
+  }
+</svg>

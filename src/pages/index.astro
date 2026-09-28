@@ -1,0 +1,33 @@
+---
+import Base from "../layouts/Base.astro";
+import SignageBar from "../components/SignageBar.astro";
+import Hero from "../components/Hero.astro";
+import Pasos from "../components/Pasos.astro";
+import Capacidades from "../components/Capacidades.astro";
+import Planes from "../components/Planes.astro";
+import Terminal from "../components/Terminal.astro";
+import SiteFooter from "../components/SiteFooter.astro";
+---
+
+<Base
+  title="Develar — Cierra más ventas por WhatsApp"
+  description="Ningún contacto sin responder, todo tu equipo en una bandeja, y cada venta atada a la campaña de Meta que la trajo."
+>
+  <SignageBar />
+
+  <main class="shell">
+    <Hero />
+    <Pasos />
+    <Capacidades />
+    <Planes />
+    <Terminal />
+  </main>
+
+  <SiteFooter />
+</Base>
+
+<style>
+  .shell {
+    padding-inline: var(--gutter);
+  }
+</style>

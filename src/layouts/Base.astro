@@ -1,0 +1,59 @@
+---
+import "../styles/global.css";
+import { SITE } from "../data/site";
+
+interface Props {
+  title: string;
+  description: string;
+}
+
+const { title, description } = Astro.props;
+const canonical = new URL(Astro.url.pathname, Astro.site ?? SITE.url).href;
+---
+
+<!doctype html>
+<html lang="es">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>{title}</title>
+    <meta name="description" content={description} />
+    <link rel="canonical" href={canonical} />
+    <link rel="icon" type="image/png" sizes="192x192" href="/brand/mark-192.png" />
+    <meta name="theme-color" content="#070a06" />
+
+    <meta property="og:type" content="website" />
+    <meta property="og:locale" content="es_LA" />
+    <meta property="og:site_name" content={SITE.name} />
+    <meta property="og:title" content={title} />
+    <meta property="og:description" content={description} />
+    <meta property="og:url" content={canonical} />
+    <meta name="twitter:card" content="summary_large_image" />
+  </head>
+  <body>
+    <a class="skip" href="#top">Saltar al contenido</a>
+    <slot />
+  </body>
+</html>
+
+<style>
+  .skip {
+    position: fixed;
+    left: 0.75rem;
+    top: 0;
+    transform: translateY(-200%);
+    z-index: 100;
+    background: var(--color-lime);
+    color: var(--color-ink-deep);
+    padding: 0.75rem 1.1rem;
+    font-family: var(--font-mono);
+    font-size: 0.6875rem;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    text-decoration: none;
+  }
+
+  .skip:focus {
+    transform: translateY(0.75rem);
+  }
+</style>

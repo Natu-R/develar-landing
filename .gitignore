@@ -1,0 +1,18 @@
+# build output
+dist/
+.astro/
+
+# dependencies
+node_modules/
+
+# review captures — regenerated, not reviewed artifacts
+.impeccable/review/
+
+# environment
+.env
+.env.production
+.DS_Store
+
+# local tool state
+.atl/
+.impeccable/questions/

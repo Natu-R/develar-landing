@@ -1,0 +1,196 @@
+---
+/**
+ * The install panel, as the product presents it.
+ *
+ * Modes, platform list and the "no sirve aquí" warning are the product's own
+ * (dashboard/src/features/admin/integrations/): the installer really does tell
+ * you when a mode will not work on your platform instead of letting you find
+ * out. The snippet shown is the real shape of the embed tag with a placeholder
+ * id.
+ */
+const MODES = [
+  { name: "Botón flotante", note: "Aparece solo en tu página", state: "on" },
+  { name: "Widget", note: "Donde tú lo pongas", state: "off" },
+  { name: "Solo lógica", note: "Para tu propio botón", state: "off" },
+] as const;
+
+const PLATFORMS = ["WordPress", "Tienda Nube", "Shopify", "Wix", "Otra"] as const;
+---
+
+<figure class="inst">
+  <div class="inst-panel glass">
+    <div class="inst-row">
+      <p class="inst-label plate">Plataforma</p>
+      <ul class="inst-chips">
+        {
+          PLATFORMS.map((p, i) => (
+            <li class={i === 0 ? "inst-chip is-on" : "inst-chip"}>{p}</li>
+          ))
+        }
+      </ul>
+    </div>
+
+    <div class="inst-row">
+      <p class="inst-label plate">Modo</p>
+      <ul class="inst-modes">
+        {
+          MODES.map((mode) => (
+            <li class={mode.state === "on" ? "inst-mode is-on" : "inst-mode"}>
+              <span class="inst-mode-dot" aria-hidden="true" />
+              <span class="inst-mode-body">
+                <span class="inst-mode-name">{mode.name}</span>
+                <span class="inst-mode-note">{mode.note}</span>
+              </span>
+            </li>
+          ))
+        }
+      </ul>
+    </div>
+
+    <div class="inst-code">
+      <p class="inst-label plate">Pega esto antes de &lt;/body&gt;</p>
+      <pre class="inst-pre"><code>&lt;script src="https://tu-cuenta.develar.app/embed/<span class="inst-id">tu-id</span>.js" defer&gt;&lt;/script&gt;</code></pre>
+    </div>
+
+  </div>
+
+  <figcaption class="note inst-caption">
+    Si un modo no funciona en tu plataforma, el instalador te propone el que
+    sí. · Ejemplo
+  </figcaption>
+</figure>
+
+<style>
+  .inst {
+    margin: 0.75rem 0 0;
+    display: grid;
+    gap: 1rem;
+    width: 100%;
+  }
+
+  .inst-panel {
+    display: grid;
+    gap: 1.25rem;
+    padding: clamp(1.1rem, 2.4vw, 1.6rem);
+  }
+
+  .inst-row {
+    display: grid;
+    gap: 0.6rem;
+  }
+
+  .inst-label {
+    margin: 0;
+    font-size: 0.625rem;
+    color: var(--color-bone-mute);
+  }
+
+  .inst-chips {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.45rem;
+  }
+
+  .inst-chip {
+    font-size: 0.75rem;
+    color: var(--color-bone-dim);
+    border: var(--stroke-thin) solid var(--color-rule);
+    border-radius: var(--radius-pill);
+    padding: 0.35rem 0.75rem;
+  }
+
+  .inst-chip.is-on {
+    color: var(--color-ink-deep);
+    background-image: var(--brand-gradient);
+    border-color: transparent;
+    box-shadow: var(--brand-sheen);
+    font-weight: 600;
+  }
+
+  .inst-modes {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    display: grid;
+    gap: 0.4rem;
+  }
+
+  .inst-mode {
+    display: flex;
+    align-items: center;
+    gap: 0.7rem;
+    padding: 0.6rem 0.75rem;
+    border-radius: var(--radius-md);
+    border: var(--stroke-thin) solid transparent;
+  }
+
+  .inst-mode.is-on {
+    border-color: color-mix(in oklab, var(--color-leaf) 40%, transparent);
+    background: color-mix(in oklab, var(--color-emerald) 14%, transparent);
+  }
+
+  .inst-mode-dot {
+    width: 10px;
+    height: 10px;
+    flex: none;
+    border-radius: var(--radius-pill);
+    box-shadow: inset 0 0 0 2px var(--color-rule-strong);
+  }
+
+  .inst-mode.is-on .inst-mode-dot {
+    background: var(--color-leaf);
+    box-shadow: none;
+  }
+
+  .inst-mode-body {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: baseline;
+    gap: 0.25rem 0.6rem;
+    min-width: 0;
+  }
+
+  .inst-mode-name {
+    font-size: 0.875rem;
+    font-weight: 500;
+    color: var(--color-bone-dim);
+  }
+
+  .inst-mode.is-on .inst-mode-name {
+    color: var(--color-bone);
+  }
+
+  .inst-mode-note {
+    font-size: 0.75rem;
+    color: var(--color-bone-mute);
+  }
+
+  .inst-code {
+    display: grid;
+    gap: 0.6rem;
+  }
+
+  .inst-pre {
+    margin: 0;
+    overflow-x: auto;
+    background: var(--color-field);
+    border: var(--stroke-thin) solid var(--color-rule);
+    border-radius: var(--radius-md);
+    padding: 0.8rem 0.9rem;
+    font-size: 0.6875rem;
+    line-height: 1.5;
+    color: var(--color-bone-dim);
+  }
+
+  .inst-id {
+    color: var(--color-lime);
+  }
+
+
+  .inst-caption {
+    max-width: 52ch;
+  }
+</style>

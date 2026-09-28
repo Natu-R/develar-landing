@@ -1,0 +1,78 @@
+---
+import RouteMap from "./RouteMap.astro";
+import TicketCta from "./TicketCta.astro";
+---
+
+<section class="hero" id="top">
+  <div class="hero-head">
+    <h1 class="sign hero-title">
+      Cierra más ventas<br />por WhatsApp.
+    </h1>
+
+    <p class="hero-lede prose-line">
+      Ningún contacto sin responder, todo tu equipo en una bandeja, y cada
+      venta atada a la campaña que la trajo.
+    </p>
+  </div>
+
+  <div class="hero-act">
+    <TicketCta />
+    <p class="hero-note note">
+      Sin formulario. El mismo canal que el producto mide.
+    </p>
+  </div>
+
+  <RouteMap />
+</section>
+
+<style>
+  .hero {
+    padding-block: clamp(2.5rem, 7vh, 5rem) clamp(2.5rem, 6vh, 4rem);
+    display: grid;
+    gap: clamp(2.75rem, 7vh, 5rem);
+  }
+
+  .hero-head {
+    display: grid;
+    gap: clamp(1.75rem, 4vw, 3rem);
+  }
+
+  /* Sized so each sentence holds one line at desktop: two full-bleed runs of
+     caps, not a four-line rag. */
+  .hero-title {
+    font-size: clamp(2.05rem, 4.2vw, 3.5rem);
+    margin: 0;
+    color: var(--color-bone);
+  }
+
+  /* The action sits directly under the headline, where the eye lands after
+     the second line, at the width the headline just established. */
+  .hero-act {
+    display: grid;
+    justify-items: start;
+    gap: 1.25rem;
+    margin-top: clamp(-0.5rem, -1vh, 0rem);
+  }
+
+  .hero-lede {
+    margin: 0;
+    font-size: clamp(1rem, 1.35vw, 1.1875rem);
+    color: var(--color-bone-dim);
+  }
+
+  .hero-note {
+    margin: 0;
+    max-width: 44ch;
+  }
+
+  @media (min-width: 62rem) {
+    .hero-head {
+      grid-template-columns: minmax(0, 1.62fr) minmax(18rem, 0.72fr);
+      align-items: end;
+    }
+    .hero-lede {
+      max-width: 36ch;
+      padding-bottom: 0.4rem;
+    }
+  }
+</style>

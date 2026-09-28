@@ -1,0 +1,74 @@
+---
+/**
+ * A frame for content that is panned rather than shrunk.
+ *
+ * A line map and a service diagram stop being readable long before they stop
+ * fitting, so below their own width the reader moves instead of the type. The
+ * hint only appears when the content genuinely overflows, measured on the
+ * element, so it never claims a scroll that is not there.
+ */
+interface Props {
+  label?: string;
+  class?: string;
+}
+
+const { label = "Desliza para ver el resto", class: className = "" } = Astro.props;
+---
+
+<div class={`frame ${className}`}>
+  <div class="frame-scroll" data-scrollframe>
+    <slot />
+  </div>
+  <p class="frame-hint note" aria-hidden="true">
+    {label} <span class="frame-arrow">&rarr;</span>
+  </p>
+</div>
+
+<style>
+  .frame {
+    display: grid;
+    gap: 0.75rem;
+    width: 100%;
+  }
+
+  .frame-scroll {
+    overflow-x: auto;
+    overscroll-behavior-x: contain;
+    scrollbar-width: none;
+  }
+
+  .frame-scroll::-webkit-scrollbar {
+    display: none;
+  }
+
+  .frame-hint {
+    margin: 0;
+    display: none;
+    align-items: baseline;
+    gap: 0.5rem;
+  }
+
+  .frame[data-overflowing] .frame-hint {
+    display: flex;
+  }
+
+  .frame-arrow {
+    color: var(--color-leaf);
+  }
+</style>
+
+<script>
+  const sync = () => {
+    document.querySelectorAll<HTMLElement>("[data-scrollframe]").forEach((el) => {
+      const frame = el.parentElement;
+      if (!frame) return;
+      const overflows = el.scrollWidth - el.clientWidth > 2;
+      frame.toggleAttribute("data-overflowing", overflows);
+    });
+  };
+
+  sync();
+  addEventListener("resize", sync, { passive: true });
+  // Web fonts change the measured width, so re-check once they land.
+  if (document.fonts) document.fonts.ready.then(sync);
+</script>

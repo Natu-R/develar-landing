@@ -1,0 +1,104 @@
+---
+/**
+ * The station wall's top strip: mark, line identity, and the standing action.
+ * It is a plate bolted to the page, not a floating pill.
+ */
+import BrandMark from "./BrandMark.astro";
+import { whatsappHref } from "../data/site";
+---
+
+<header class="bar">
+  <a class="bar-brand" href="#top">
+    <BrandMark size={30} id="bar" />
+    <span class="bar-word sign-sm">Develar</span>
+  </a>
+
+  <nav class="bar-nav plate" aria-label="Secciones">
+    <a href="#recorrido">Cómo funciona</a>
+    <a href="#producto">Producto</a>
+    <a href="#planes">Planes</a>
+    <a href="#hablemos">Hablemos</a>
+  </nav>
+
+  <a class="bar-action brand-button plate" href={whatsappHref} rel="noopener">
+    <span class="bar-action-dot" aria-hidden="true"></span>
+    WhatsApp
+  </a>
+</header>
+
+<style>
+  .bar {
+    position: sticky;
+    top: 0;
+    z-index: 40;
+    display: flex;
+    align-items: center;
+    gap: 1.5rem;
+    padding: 0.7rem var(--gutter);
+    background-color: color-mix(in oklab, var(--color-ink) 72%, transparent);
+    backdrop-filter: blur(18px) saturate(140%);
+    border-bottom: var(--stroke-thin) solid var(--color-rule);
+  }
+
+  .bar-brand {
+    display: flex;
+    align-items: center;
+    gap: 0.6rem;
+    text-decoration: none;
+    color: var(--color-bone);
+    flex: none;
+  }
+
+  .bar-word {
+    font-size: 1.0625rem;
+    letter-spacing: 0.06em;
+  }
+
+  .bar-nav {
+    display: none;
+    gap: 1.6rem;
+    margin-inline-start: auto;
+    font-size: 0.625rem;
+  }
+
+  .bar-nav a {
+    color: var(--color-bone-dim);
+    text-decoration: none;
+    padding-block: 0.35rem;
+    border-bottom: var(--stroke) solid transparent;
+  }
+
+  .bar-nav a:hover,
+  .bar-nav a:focus-visible {
+    color: var(--color-bone);
+    border-bottom-color: var(--color-leaf);
+  }
+
+  .bar-action {
+    margin-inline-start: auto;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    font-size: 0.625rem;
+    padding: 0.55rem 1rem;
+    border-radius: var(--radius-pill);
+    text-decoration: none;
+  }
+
+  .bar-action-dot {
+    width: 6px;
+    height: 6px;
+    background: currentColor;
+    border-radius: var(--radius-pill);
+    flex: none;
+  }
+
+  @media (min-width: 62rem) {
+    .bar-nav {
+      display: flex;
+    }
+    .bar-action {
+      margin-inline-start: 0;
+    }
+  }
+</style>

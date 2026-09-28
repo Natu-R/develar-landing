@@ -1,0 +1,356 @@
+---
+/**
+ * The closing form.
+ *
+ * It posts to `SITE.formEndpoint` when one is configured. When it is not — the
+ * state this repo ships in — it composes the answers into a WhatsApp message
+ * and opens the same conversation the rest of the page points at. That keeps
+ * the form honest: it never silently swallows a submission into a backend that
+ * does not exist yet, and the fallback is the product's own channel.
+ */
+import { SITE, whatsappHref } from "../data/site";
+---
+
+<form class="form glass" data-contact-form novalidate>
+  <div class="form-grid">
+    <p class="field">
+      <label class="field-label" for="cf-name">Nombre</label>
+      <input
+        class="field-input"
+        id="cf-name"
+        name="nombre"
+        type="text"
+        autocomplete="name"
+        required
+        placeholder="Tu nombre"
+      />
+      <span class="field-error" data-error-for="cf-name" hidden></span>
+    </p>
+
+    <p class="field">
+      <label class="field-label" for="cf-business">Negocio</label>
+      <input
+        class="field-input"
+        id="cf-business"
+        name="negocio"
+        type="text"
+        autocomplete="organization"
+        required
+        placeholder="Nombre de la operación"
+      />
+      <span class="field-error" data-error-for="cf-business" hidden></span>
+    </p>
+
+    <p class="field">
+      <label class="field-label" for="cf-phone">WhatsApp</label>
+      <input
+        class="field-input"
+        id="cf-phone"
+        name="whatsapp"
+        type="tel"
+        inputmode="tel"
+        autocomplete="tel"
+        required
+        placeholder="Con código de país"
+      />
+      <span class="field-error" data-error-for="cf-phone" hidden></span>
+    </p>
+
+    <p class="field">
+      <label class="field-label" for="cf-volume">Conversaciones por mes</label>
+      <span class="field-select">
+        <select class="field-input" id="cf-volume" name="volumen">
+          <option value="">Elige un rango</option>
+          <option>Menos de 500</option>
+          <option>500 a 2.000</option>
+          <option>2.000 a 10.000</option>
+          <option>Más de 10.000</option>
+        </select>
+      </span>
+    </p>
+
+    <p class="field field--wide">
+      <label class="field-label" for="cf-note">
+        Cuéntanos tu caso <span class="field-optional">opcional</span>
+      </label>
+      <textarea
+        class="field-input"
+        id="cf-note"
+        name="mensaje"
+        rows="3"
+        placeholder="Cuántos agentes tienes, qué campañas corres, qué no estás pudiendo medir"
+      ></textarea>
+    </p>
+  </div>
+
+  <div class="form-foot">
+      <button class="form-submit brand-button" type="submit">
+      <span data-submit-label>Quiero una demostración</span>
+    </button>
+    <p class="note form-legal">
+      Te escribimos por WhatsApp. No mandamos newsletters y no compartimos tus
+      datos con nadie.
+    </p>
+  </div>
+
+  <p class="form-status note" data-form-status role="status" aria-live="polite" hidden></p>
+</form>
+
+<script define:vars={{ endpoint: SITE.formEndpoint, fallback: whatsappHref, number: SITE.whatsappNumber }}>
+  document.querySelectorAll("[data-contact-form]").forEach((form) => {
+    const status = form.querySelector("[data-form-status]");
+    const submit = form.querySelector(".form-submit");
+    const label = form.querySelector("[data-submit-label]");
+    const original = label.textContent;
+
+    const setError = (input, message) => {
+      const slot = form.querySelector(`[data-error-for="${input.id}"]`);
+      if (!slot) return;
+      slot.textContent = message ?? "";
+      slot.hidden = !message;
+      input.setAttribute("aria-invalid", message ? "true" : "false");
+      if (message) input.setAttribute("aria-describedby", slot.dataset.errorFor + "-err");
+    };
+
+    /** Name the problem and the recovery, never just "inválido". */
+    const check = (input) => {
+      const value = input.value.trim();
+      if (input.required && !value) {
+        setError(input, `Falta ${input.labels[0].textContent.trim().toLowerCase()}.`);
+        return false;
+      }
+      if (input.type === "tel" && value && value.replace(/\D/g, "").length < 8) {
+        setError(input, "Pon el número completo, con código de país.");
+        return false;
+      }
+      setError(input, null);
+      return true;
+    };
+
+    form.querySelectorAll("input[required]").forEach((input) => {
+      input.addEventListener("blur", () => check(input));
+      input.addEventListener("input", () => {
+        if (input.getAttribute("aria-invalid") === "true") check(input);
+      });
+    });
+
+    form.addEventListener("submit", async (event) => {
+      event.preventDefault();
+
+      const inputs = [...form.querySelectorAll("input[required]")];
+      const ok = inputs.map(check).every(Boolean);
+      if (!ok) {
+        inputs.find((i) => i.getAttribute("aria-invalid") === "true")?.focus();
+        return;
+      }
+
+      const data = Object.fromEntries(new FormData(form).entries());
+
+      // No endpoint configured: hand the answers to the channel the product
+      // itself runs on rather than pretending they were stored.
+      if (!endpoint) {
+        const lines = [
+          "Hola, quiero ver Develar en acción.",
+          "",
+          `Nombre: ${data.nombre}`,
+          `Negocio: ${data.negocio}`,
+          `WhatsApp: ${data.whatsapp}`,
+          data.volumen ? `Conversaciones por mes: ${data.volumen}` : null,
+          data.mensaje ? `Caso: ${data.mensaje}` : null,
+        ].filter(Boolean);
+        location.href = `https://wa.me/${number}?text=${encodeURIComponent(lines.join("\n"))}`;
+        return;
+      }
+
+      submit.disabled = true;
+      label.textContent = "Enviando…";
+      status.hidden = true;
+
+      try {
+        const response = await fetch(endpoint, {
+          method: "POST",
+          headers: { "Content-Type": "application/json", Accept: "application/json" },
+          body: JSON.stringify(data),
+        });
+        if (!response.ok) throw new Error(String(response.status));
+        form.reset();
+        status.textContent = "Listo. Te escribimos por WhatsApp en el día.";
+        status.dataset.state = "ok";
+      } catch {
+        status.innerHTML =
+          `No pudimos enviarlo. Prueba de nuevo, o escríbenos directo por <a href="${fallback}">WhatsApp</a>.`;
+        status.dataset.state = "error";
+      } finally {
+        status.hidden = false;
+        submit.disabled = false;
+        label.textContent = original;
+      }
+    });
+  });
+</script>
+
+<style>
+  .form {
+    display: grid;
+    gap: 1.5rem;
+    padding: clamp(1.4rem, 3vw, 2.25rem);
+    width: 100%;
+    max-width: 44rem;
+  }
+
+  .form-grid {
+    display: grid;
+    gap: 1rem;
+  }
+
+  .field {
+    display: grid;
+    gap: 0.45rem;
+    margin: 0;
+    min-width: 0;
+  }
+
+  .field-label {
+    font-size: 0.8125rem;
+    font-weight: 500;
+    color: var(--color-bone-dim);
+  }
+
+  .field-optional {
+    color: var(--color-bone-mute);
+    font-weight: 400;
+  }
+
+  .field-input {
+    font: inherit;
+    font-size: 0.9375rem;
+    width: 100%;
+    color: var(--color-bone);
+    background: var(--color-field);
+    border: var(--stroke-thin) solid var(--color-rule);
+    border-radius: var(--radius-md);
+    padding: 0.7rem 0.85rem;
+    transition:
+      border-color 180ms var(--ease-out),
+      box-shadow 180ms var(--ease-out);
+  }
+
+  .field-input::placeholder {
+    color: var(--color-bone-mute);
+  }
+
+  .field-input:hover {
+    border-color: var(--color-rule-strong);
+  }
+
+  .field-input:focus {
+    outline: none;
+    border-color: var(--color-leaf);
+    box-shadow: 0 0 0 3px color-mix(in oklab, var(--color-emerald) 28%, transparent);
+  }
+
+  .field-input[aria-invalid="true"] {
+    border-color: var(--color-bone-dim);
+    box-shadow: 0 0 0 3px color-mix(in oklab, var(--color-bone-dim) 18%, transparent);
+  }
+
+  /* The select keeps the field's shape and gets its own caret. */
+  .field-select {
+    position: relative;
+    display: block;
+  }
+
+  .field-select select {
+    appearance: none;
+    padding-right: 2.25rem;
+  }
+
+  .field-select::after {
+    content: "";
+    position: absolute;
+    right: 0.95rem;
+    top: 50%;
+    width: 0.5rem;
+    height: 0.5rem;
+    border-right: 2px solid var(--color-bone-mute);
+    border-bottom: 2px solid var(--color-bone-mute);
+    transform: translateY(-70%) rotate(45deg);
+    pointer-events: none;
+  }
+
+  textarea.field-input {
+    resize: vertical;
+    min-height: 5.5rem;
+  }
+
+  .field-error {
+    font-size: 0.75rem;
+    color: var(--color-bone);
+  }
+
+  .form-foot {
+    display: grid;
+    gap: 0.9rem;
+    justify-items: start;
+  }
+
+  .form-submit {
+    font: inherit;
+    font-weight: 600;
+    font-size: 0.9375rem;
+    border-radius: var(--radius-pill);
+    padding: 0.85rem 1.6rem;
+    cursor: pointer;
+  }
+
+  .form-submit:disabled {
+    cursor: progress;
+    filter: saturate(0.4) brightness(0.8);
+    transform: none;
+  }
+
+  .form-legal {
+    max-width: 46ch;
+  }
+
+  .form-status {
+    margin: 0;
+    padding: 0.75rem 0.9rem;
+    border-radius: var(--radius-md);
+    border: var(--stroke-thin) solid var(--color-rule);
+    color: var(--color-bone);
+  }
+
+  .form-status[data-state="ok"] {
+    border-color: color-mix(in oklab, var(--color-leaf) 55%, transparent);
+    background: color-mix(in oklab, var(--color-emerald) 12%, transparent);
+  }
+
+  .form-status[data-state="error"] {
+    background: color-mix(in oklab, var(--color-bone-dim) 10%, transparent);
+  }
+
+  .form-status a {
+    color: var(--color-lime);
+  }
+
+  @media (min-width: 40rem) {
+    .form-grid {
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 1rem 1.25rem;
+    }
+    .field--wide {
+      grid-column: 1 / -1;
+    }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .field-input,
+    .form-submit {
+      transition: none;
+    }
+    .form-submit:hover:not(:disabled) {
+      transform: none;
+    }
+  }
+</style>

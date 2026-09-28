@@ -1,0 +1,508 @@
+---
+/**
+ * Línea 01 — the overview map, and *la corrida*.
+ *
+ * One continuous run with two 45° turns, eight stations, and a ticket carrying
+ * a real code that travels it. The run plays once the map comes on screen: the
+ * token follows the line continuously, stations light as it reaches them, and
+ * the code is stamped where the system validates it.
+ *
+ * The RESTING state is the completed run — every station legible, the token
+ * parked at the terminus, the stamp down, the readout reading "Reportado". The
+ * run subtracts light and gives it back; it never withholds it. A stalled
+ * animation, a blocked script or a reduced-motion preference therefore all
+ * leave a fully readable diagram instead of a greyed-out thesis object.
+ *
+ * One animation frame drives everything: the token position and every station
+ * state are painted from the same segment and eased progress.
+ */
+import { STEPS, RUN_STATES } from "../data/line";
+import Pictogram from "./Pictogram.astro";
+import ScrollFrame from "./ScrollFrame.astro";
+
+/**
+ * The run. Its two turns are swept rather than mitred — the mark this brand is
+ * built on is a ring, and a line that serves it has no business snapping to a
+ * hard corner. Each elbow is a quadratic through the old corner point.
+ */
+const ROUTE = [
+  "M60 190",
+  "H272",
+  "Q300 190 319.8 170.2",
+  "L360.2 129.8",
+  "Q380 110 408 110",
+  "H792",
+  "Q820 110 839.8 90.2",
+  "L876.2 53.8",
+  "Q896 34 924 34",
+  "H1160",
+].join(" ");
+
+/**
+ * Station coordinates, and which side of the line its plate hangs. Stations 04
+ * and 07 sit clear of the sweeps: a node parked on a curve's control point
+ * floats off its own line.
+ */
+const PLACEMENT = [
+  { x: 60, y: 190, side: "below" },
+  { x: 170, y: 190, side: "above" },
+  { x: 265, y: 190, side: "below" },
+  { x: 470, y: 110, side: "above" },
+  { x: 700, y: 110, side: "below" },
+  { x: 1000, y: 34, side: "below" },
+] as const;
+
+/** The demonstration code. It rides the line so the page's argument is visible. */
+const CODE = "DV-7K2Q";
+
+/**
+ * Step index at which each state begins: the contact exists from the first
+ * step, is contacted when an agent takes it, converts at the carga, and is
+ * reported once Meta has it.
+ */
+const STATE_AT = [0, 3, 4, 5];
+
+const stops = STEPS.map((step, i) => ({ ...step, ...PLACEMENT[i] }));
+const last = stops.length - 1;
+---
+
+<figure
+  class="map"
+  aria-labelledby="map-caption"
+  data-corrida
+  data-stops={JSON.stringify(PLACEMENT.map((p) => [p.x, p.y]))}
+  data-states={JSON.stringify(STATE_AT)}
+  data-labels={JSON.stringify(RUN_STATES)}
+>
+  <figcaption id="map-caption" class="note map-caption">
+    Del anuncio a la campaña que se lleva el crédito.
+  </figcaption>
+
+  <ScrollFrame label="Desliza para recorrer la línea" class="map-frame">
+    <svg class="map-svg" viewBox="0 0 1200 260" role="presentation">
+      <defs>
+        <linearGradient id="route-axis" x1="0" y1="0" x2="1160" y2="0" gradientUnits="userSpaceOnUse">
+          <stop offset="0" stop-color="var(--color-emerald)"></stop>
+          <stop offset="0.52" stop-color="var(--color-leaf)"></stop>
+          <stop offset="1" stop-color="var(--color-lime)"></stop>
+        </linearGradient>
+      </defs>
+
+      <!-- The run itself. -->
+      <path d={ROUTE} class="route" stroke="url(#route-axis)"></path>
+      <!-- End of line. -->
+      <path d="M1160 20 V48" class="route-terminal" stroke="var(--color-lime)"></path>
+
+      <!-- Stamped where the money lands against the contact. -->
+      <g class="stamp" transform="translate(700 196) rotate(-6)">
+        <rect x="-74" y="-18" width="148" height="36" rx="14"></rect>
+        <text x="0" y="6" text-anchor="middle">Convertido</text>
+      </g>
+
+      {
+        stops.map((stop, i) => {
+          const tint =
+            i === 0
+              ? "var(--color-emerald)"
+              : i === last
+                ? "var(--color-lime)"
+                : "var(--color-leaf)";
+          const plateY = stop.side === "above" ? stop.y - 30 : stop.y + 30;
+          const idY = stop.side === "above" ? plateY - 19 : plateY + 19;
+          return (
+            <g class="stop" style={`--tint:${tint}`} data-stop={i}>
+              {stop.id === "04" ? (
+                <circle cx={stop.x} cy={stop.y} r="15" class="stop-ring" />
+              ) : null}
+              <circle cx={stop.x} cy={stop.y} r="9" class="stop-node" />
+              <text x={stop.x} y={idY} class="stop-id" text-anchor="middle">
+                {stop.id}
+              </text>
+              <text x={stop.x} y={plateY} class="stop-name" text-anchor="middle">
+                {stop.name}
+              </text>
+            </g>
+          );
+        })
+      }
+
+      <!-- The boleto rides over the stations, so no node it passes can cover
+           its code. It carries its own punch: the stub is centred on the point
+           it travels, and the printed code sits clear of it. -->
+      <g class="token" transform="translate(1000 34)">
+        <rect x="-15" y="-15" width="102" height="30" rx="8"></rect>
+        <circle cx="0" cy="0" r="6" class="token-punch"></circle>
+        <path d="M15 -13 V13" class="token-perf"></path>
+        <text x="51" y="5" text-anchor="middle" class="token-code">{CODE}</text>
+      </g>
+    </svg>
+  </ScrollFrame>
+
+  <div class="map-run">
+    <p class="map-readout plate">
+      <span class="map-readout-code">{CODE}</span>
+      <span class="map-readout-sep" aria-hidden="true">·</span>
+      <span class="map-readout-state" data-run-state>{RUN_STATES[RUN_STATES.length - 1]}</span>
+    </p>
+    <button class="map-replay plate" type="button" data-run-again hidden>
+      Correr el boleto otra vez
+    </button>
+  </div>
+
+    <ol class="map-legend plate">
+      {
+        stops.map((stop) => (
+          <li>
+            <Pictogram name={stop.pictogram} size={20} />
+            <span class="map-legend-id">{stop.id}</span>
+            <span class="map-legend-name">{stop.name}</span>
+          </li>
+        ))
+      }
+    </ol>
+</figure>
+
+<style>
+  .map {
+    margin: 0;
+    display: grid;
+    gap: 1.25rem;
+  }
+
+  .map-caption {
+    max-width: 62ch;
+  }
+
+  /* The map bleeds to the viewport edge — a line does not sit inside a box. */
+  .map-frame {
+    margin-inline: calc(var(--gutter) * -1);
+    padding-inline: var(--gutter);
+  }
+
+  .map-svg {
+    display: block;
+    width: 100%;
+    min-width: 62rem;
+    height: auto;
+  }
+
+  .route {
+    fill: none;
+    stroke-width: 8;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+  }
+
+  .route-terminal {
+    stroke-width: 8;
+    stroke-linecap: round;
+  }
+
+  /* ---- Stations -------------------------------------------------------
+     Names sit at full ink at all times. Arrival is told by the node's ring,
+     which is a mark rather than text, so nothing readable depends on the run
+     having played. */
+
+  .stop-name {
+    font-family: var(--font-display);
+    font-weight: 600;
+    font-size: 15px;
+    letter-spacing: 0.035em;
+    text-transform: uppercase;
+    fill: var(--color-bone);
+  }
+
+  .stop-id {
+    font-family: var(--font-mono);
+    font-size: 10px;
+    font-weight: 500;
+    letter-spacing: 0.08em;
+    fill: var(--color-bone-dim);
+  }
+
+  .stop-node {
+    fill: var(--color-ink);
+    stroke: var(--tint);
+    stroke-width: 4;
+  }
+
+  .stop-ring {
+    fill: none;
+    stroke: var(--tint);
+    stroke-width: 2;
+  }
+
+  /* Only while a run is in progress does an unreached node sit hollow. */
+  .map[data-running] .stop:not(.is-reached) .stop-node,
+  .map[data-running] .stop:not(.is-reached) .stop-ring {
+    stroke: var(--color-rule);
+  }
+
+  /* ---- The boleto ---------------------------------------------------- */
+
+  .token rect {
+    fill: var(--color-bone);
+  }
+
+  .token-punch {
+    fill: var(--color-ink);
+    stroke: var(--color-lime);
+    stroke-width: 2.5;
+  }
+
+  .token .token-perf {
+    stroke: var(--color-ink);
+    stroke-width: 1.5;
+    stroke-dasharray: 2 2.5;
+  }
+
+  .token-code {
+    font-family: var(--font-mono);
+    font-weight: 600;
+    font-size: 13px;
+    letter-spacing: 0.02em;
+    fill: var(--color-ink-deep);
+  }
+
+  /* ---- The stamp ----------------------------------------------------- */
+
+  .stamp rect {
+    fill: none;
+    stroke: var(--color-lime);
+    stroke-width: 2.5;
+  }
+
+  .stamp text {
+    font-family: var(--font-display);
+    font-weight: 700;
+    font-size: 15px;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    fill: var(--color-lime);
+  }
+
+  .map[data-running] .stamp {
+    visibility: hidden;
+  }
+
+  .map[data-running][data-stamped] .stamp {
+    visibility: visible;
+  }
+
+  /* ---- Readout and replay -------------------------------------------- */
+
+  .map-run {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 0.75rem 1.5rem;
+  }
+
+  .map-readout {
+    margin: 0;
+    display: flex;
+    align-items: baseline;
+    gap: 0.6rem;
+    font-size: 0.6875rem;
+  }
+
+  .map-readout-code {
+    color: var(--color-bone);
+  }
+
+  .map-readout-sep {
+    color: var(--color-rule);
+  }
+
+  .map-readout-state {
+    color: var(--color-lime);
+    min-width: 9ch;
+  }
+
+  .map-replay {
+    font-family: var(--font-mono);
+    font-size: 0.6875rem;
+    color: var(--color-bone-dim);
+    background: color-mix(in oklab, var(--color-surface) 70%, transparent);
+    border: var(--stroke-thin) solid var(--color-rule);
+    border-radius: var(--radius-pill);
+    padding: 0.55rem 1rem;
+    cursor: pointer;
+    transition:
+      color 180ms var(--ease-out),
+      border-color 180ms var(--ease-out);
+  }
+
+  .map-replay:hover,
+  .map-replay:focus-visible {
+    color: var(--color-bone);
+    border-color: var(--color-leaf);
+  }
+
+  /* ---- Legend -------------------------------------------------------- */
+
+  .map-legend {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(7.5rem, 1fr));
+    gap: 0.75rem 1rem;
+    list-style: none;
+    margin: 0;
+    padding: 0.9rem 0 0;
+    border-top: var(--stroke-thin) solid var(--color-rule);
+    font-size: 0.625rem;
+  }
+
+  .map-legend li {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    color: var(--color-bone-dim);
+  }
+
+  .map-legend li :global(svg) {
+    flex: none;
+    color: var(--color-leaf);
+  }
+
+  .map-legend-id {
+    color: var(--color-bone-mute);
+  }
+
+  .map-legend-name {
+    color: var(--color-bone);
+    letter-spacing: 0.06em;
+  }
+</style>
+
+<script is:inline>
+  document.querySelectorAll("[data-corrida]").forEach((map) => {
+    const route = map.querySelector(".route");
+    const token = map.querySelector(".token");
+    const readout = map.querySelector("[data-run-state]");
+    const replay = map.querySelector("[data-run-again]");
+    const stops = [...map.querySelectorAll(".stop")];
+    if (!route || !token || !readout || !replay) return;
+
+    const stateAt = JSON.parse(map.dataset.states ?? "[]");
+    const labels = JSON.parse(map.dataset.labels ?? "[]");
+    const coords = JSON.parse(map.dataset.stops ?? "[]");
+    if (!coords.length || !labels.length || !stops.length) return;
+
+    const last = stops.length - 1;
+    const stampAt = stateAt[2] ?? last;
+    const frame = map.querySelector("[data-scrollframe]");
+    const routeLength = route.getTotalLength();
+    const STEP_MS = 900;
+    let animationFrame = 0;
+
+    // Anchor each smooth segment to the real station point on the SVG path.
+    const stationLengths = coords.map(([x, y]) => {
+      let nearest = 0;
+      let nearestDistance = Number.POSITIVE_INFINITY;
+      for (let sample = 0; sample <= 600; sample += 1) {
+        const length = (routeLength * sample) / 600;
+        const point = route.getPointAtLength(length);
+        const distance = (point.x - x) ** 2 + (point.y - y) ** 2;
+        if (distance < nearestDistance) {
+          nearest = length;
+          nearestDistance = distance;
+        }
+      }
+      return nearest;
+    });
+
+    const follow = (x) => {
+      if (!frame) return;
+      const slack = frame.scrollWidth - frame.clientWidth;
+      if (slack <= 2) return;
+      const renderedX = (x / 1200) * frame.scrollWidth - frame.scrollLeft;
+      const margin = Math.min(frame.clientWidth * 0.24, 180);
+      if (renderedX >= margin && renderedX <= frame.clientWidth - margin) return;
+      const target =
+        (x / 1200) * frame.scrollWidth -
+        (renderedX < margin ? margin : frame.clientWidth - margin);
+      frame.scrollLeft = Math.max(0, Math.min(slack, target));
+    };
+
+    const paint = (segment, segmentProgress) => {
+      const station = Math.max(0, Math.min(last, segment));
+      const eased = segmentProgress * segmentProgress * (3 - 2 * segmentProgress);
+      const pathLength =
+        stationLengths[station] +
+        (stationLengths[Math.min(last, station + 1)] - stationLengths[station]) * eased;
+      const point = route.getPointAtLength(pathLength);
+
+      token.setAttribute("transform", `translate(${point.x} ${point.y})`);
+      follow(point.x);
+      stops.forEach((stop, index) =>
+        stop.classList.toggle("is-reached", index <= station),
+      );
+      map.toggleAttribute("data-stamped", station >= stampAt);
+      map.dataset.at = String(station);
+
+      let label = labels[0];
+      stateAt.forEach((from, index) => {
+        if (station >= from && labels[index]) label = labels[index];
+      });
+      readout.textContent = label;
+    };
+
+    const stop = () => {
+      cancelAnimationFrame(animationFrame);
+      animationFrame = 0;
+      map.removeAttribute("data-running");
+    };
+
+    const run = () => {
+      stop();
+      map.setAttribute("data-running", "");
+      const startedAt = performance.now();
+
+      const tick = (now) => {
+        // A frame's timestamp can predate the moment the run started, and a
+        // negative elapsed would index a station before the first one.
+        const elapsed = Math.max(0, now - startedAt);
+        const completed = Math.min(last, Math.floor(elapsed / STEP_MS));
+        const segmentProgress = Math.min(1, (elapsed % STEP_MS) / STEP_MS);
+
+        if (elapsed >= last * STEP_MS) {
+          paint(last, 0);
+          stop();
+          return;
+        }
+
+        paint(completed, segmentProgress);
+        animationFrame = requestAnimationFrame(tick);
+      };
+
+      paint(0, 0);
+      animationFrame = requestAnimationFrame(tick);
+    };
+
+    const settle = () => follow(coords[Number(map.dataset.at ?? last)][0]);
+
+    map.dataset.at = String(last);
+    requestAnimationFrame(settle);
+    if (document.fonts) document.fonts.ready.then(settle);
+    addEventListener("resize", settle, { passive: true });
+
+    if (matchMedia("(prefers-reduced-motion: reduce)").matches) {
+      return;
+    }
+
+    replay.hidden = false;
+    replay.addEventListener("click", run);
+
+    // Run once the map is actually on screen: a run that finishes before
+    // anyone is looking reads as a line that never moved.
+    const watch = new IntersectionObserver(
+      (entries) => {
+        if (!entries.some((entry) => entry.isIntersecting)) return;
+        watch.disconnect();
+        run();
+      },
+      { threshold: 0.5 },
+    );
+    watch.observe(map);
+  });
+</script>

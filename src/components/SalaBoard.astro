@@ -1,0 +1,254 @@
+---
+/**
+ * La sala — the operations board the line is run from.
+ *
+ * States come from the product: shift open, WhatsApp session linked or dropped,
+ * conversion counts against a cashier's limit. There is no red in the ink set,
+ * so a dropped session reads the way a cancelled row reads on a departure
+ * board — struck and hatched, not recoloured.
+ */
+import ScrollFrame from "./ScrollFrame.astro";
+interface Crew {
+  name: string;
+  shift: string;
+  session: "enlazada" | "caída" | "sin enlazar";
+  leads: string;
+  conv: string;
+  state: "En turno" | "Fuera de turno";
+}
+
+const CREW: Crew[] = [
+  { name: "Agente 01", shift: "18:00 – 02:00", session: "enlazada", leads: "47", conv: "12", state: "En turno" },
+  { name: "Agente 02", shift: "18:00 – 02:00", session: "enlazada", leads: "39", conv: "9", state: "En turno" },
+  { name: "Agente 03", shift: "—", session: "caída", leads: "0", conv: "0", state: "Fuera de turno" },
+  { name: "Agente 04", shift: "22:00 – 06:00", session: "sin enlazar", leads: "4", conv: "1", state: "En turno" },
+];
+
+const ROLES = [
+  { code: "AD", name: "Admin", can: "agentes, sesiones, landings, límites y estadísticas" },
+  { code: "CA", name: "Agente", can: "turno, WhatsApp propio, chat y conversiones" },
+];
+---
+
+<div class="sala">
+  <ScrollFrame label="Desliza para ver el estado de cada agente" class="glass panel">
+    <table class="sala-table">
+      <caption class="sr-only">Estado de los agentes del equipo</caption>
+      <thead>
+        <tr class="plate">
+          <th scope="col">Agente</th>
+          <th scope="col">Turno</th>
+          <th scope="col">Sesión</th>
+          <th scope="col" class="num">Leads</th>
+          <th scope="col" class="num">Conv.</th>
+          <th scope="col">Estado</th>
+        </tr>
+      </thead>
+      <tbody>
+        {
+          CREW.map((c) => (
+            <tr class={c.session === "caída" ? "is-down" : undefined}>
+              <th scope="row" class="tabular sala-name">
+                {c.name}
+              </th>
+              <td class="tabular">{c.shift}</td>
+              <td class={`tabular sala-session sala-session--${c.session === "enlazada" ? "up" : c.session === "caída" ? "down" : "idle"}`}>
+                <span class="sala-dot" aria-hidden="true" />
+                {c.session}
+              </td>
+              <td class="tabular num">{c.leads}</td>
+              <td class="tabular num">{c.conv}</td>
+              <td class="tabular sala-state">{c.state}</td>
+            </tr>
+          ))
+        }
+      </tbody>
+    </table>
+  </ScrollFrame>
+
+  <ul class="sala-roles">
+    {
+      ROLES.map((role) => (
+        <li>
+          <span class="sala-role-code plate">{role.code}</span>
+          <span class="sala-role-body">
+            <span class="sign-sm sala-role-name">{role.name}</span>
+            <span class="sala-role-can">{role.can}</span>
+          </span>
+        </li>
+      ))
+    }
+  </ul>
+
+  <p class="note sala-caption">
+    Una sesión caída se relinkea con un QR desde el mismo panel. · Ejemplo
+  </p>
+</div>
+
+<style>
+  .sala {
+    margin: 0.75rem 0 0;
+    display: grid;
+    gap: 1.5rem;
+    width: 100%;
+  }
+
+  .sala-table {
+    width: 100%;
+    min-width: 42rem;
+    border-collapse: collapse;
+    font-size: 0.6875rem;
+  }
+
+  .sala-table th[scope="col"] {
+    text-align: left;
+    font-size: 0.6875rem;
+    font-weight: 500;
+    color: var(--color-bone-mute);
+    padding: 0.7rem 1rem;
+    border-bottom: var(--stroke-thin) solid var(--color-rule);
+  }
+
+  .sala-table td,
+  .sala-table th[scope="row"] {
+    padding: 0.7rem 1rem;
+    color: var(--color-bone-dim);
+    white-space: nowrap;
+    text-align: left;
+    font-weight: 400;
+  }
+
+  .sala-table tbody tr + tr > * {
+    border-top: var(--stroke-thin) solid color-mix(in oklab, var(--color-rule) 45%, transparent);
+  }
+
+  .num {
+    text-align: right !important;
+  }
+
+  .sala-name {
+    color: var(--color-bone) !important;
+  }
+
+  /* Stays a table cell — a <td> set to flex drops out of the column layout
+     and drags a stray edge through the panel. The dot rides inline instead. */
+  .sala-dot {
+    display: inline-block;
+    margin-right: 0.5rem;
+    vertical-align: 0.02em;
+  }
+
+  /* Three session states, three marks — filled, hollow, and struck. */
+  .sala-dot {
+    width: 7px;
+    height: 7px;
+    border-radius: var(--radius-pill);
+  }
+
+  .sala-session--up .sala-dot {
+    background: var(--color-leaf);
+  }
+
+  .sala-session--idle .sala-dot {
+    background: transparent;
+    box-shadow: inset 0 0 0 1.5px var(--color-bone-mute);
+  }
+
+  .sala-session--down .sala-dot {
+    background: transparent;
+    box-shadow: inset 0 0 0 1px var(--color-bone-mute);
+  }
+
+  .sala-state {
+    color: var(--color-lime) !important;
+  }
+
+  /* Cancelled row: struck and hatched, never recoloured. */
+  .is-down > * {
+    color: var(--color-bone-mute) !important;
+    text-decoration: line-through;
+    text-decoration-thickness: 1px;
+  }
+
+  .is-down .sala-dot {
+    background: transparent;
+    box-shadow: inset 0 0 0 1px var(--color-rule);
+  }
+
+  .sala-roles {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    display: grid;
+    gap: 0.9rem;
+  }
+
+  .sala-roles li {
+    display: flex;
+    align-items: flex-start;
+    gap: 0.85rem;
+  }
+
+  .sala-role-code {
+    flex: none;
+    display: grid;
+    place-items: center;
+    width: 2.2rem;
+    height: 1.7rem;
+    border-radius: var(--radius-pill);
+    font-size: 0.6875rem;
+    color: var(--color-ink-deep);
+    background: var(--color-bone-dim);
+  }
+
+  .sala-roles li:first-child .sala-role-code {
+    background: var(--color-lime);
+  }
+  .sala-roles li:nth-child(2) .sala-role-code {
+    background: var(--color-leaf);
+  }
+
+  .sala-role-body {
+    display: grid;
+    gap: 0.2rem;
+  }
+
+  .sala-role-name {
+    font-size: 0.8125rem;
+    color: var(--color-bone);
+    letter-spacing: 0.04em;
+  }
+
+  .sala-role-can {
+    font-size: 0.8125rem;
+    color: var(--color-bone-dim);
+    line-height: 1.45;
+  }
+
+  .sala-caption {
+    max-width: 56ch;
+  }
+
+  .sr-only {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    padding: 0;
+    margin: -1px;
+    overflow: hidden;
+    clip-path: inset(50%);
+    white-space: nowrap;
+    border: 0;
+  }
+
+  @media (min-width: 48rem) {
+    .sala-roles {
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 1.5rem;
+    }
+  }
+
+  .panel {
+    overflow: hidden;
+  }
+</style>

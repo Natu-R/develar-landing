@@ -1,0 +1,141 @@
+---
+/**
+ * El recorrido, in one section.
+ *
+ * This used to be eight full-height sections, roughly four thousand pixels of
+ * page for a story that takes a minute to tell. The steps now sit in one grid
+ * on the line's own spine, which is where the page's length was hiding.
+ */
+import { STEPS } from "../data/line";
+import Pictogram from "./Pictogram.astro";
+import EventLog from "./EventLog.astro";
+---
+
+<section class="pasos" id="recorrido">
+  <header class="pasos-head">
+    <h2 class="sign pasos-title">La venta ya entró. Meta nunca se enteró.</h2>
+    <p class="pasos-lede prose-line">
+      Entre el click y la plata hay un salto a WhatsApp donde casi todos los
+      sistemas pierden el rastro. Esto es lo que pasa en el medio.
+    </p>
+  </header>
+
+  <ol class="pasos-grid">
+    {
+      STEPS.map((step, i) => (
+        <li class="paso" style={`--i:${i}`}>
+          <span class="paso-mark" aria-hidden="true">
+            <Pictogram name={step.pictogram} size={26} />
+          </span>
+          <p class="paso-num plate">{step.id}</p>
+          <h3 class="sign-sm paso-name">{step.name}</h3>
+          <p class="paso-headline">{step.headline}</p>
+        </li>
+      ))
+    }
+  </ol>
+
+  <EventLog />
+</section>
+
+<style>
+  .pasos {
+    display: grid;
+    gap: clamp(1.75rem, 4vh, 2.75rem);
+    padding-block: clamp(2.5rem, 6vh, 4rem);
+  }
+
+  .pasos-head {
+    display: grid;
+    gap: 0.85rem;
+  }
+
+  .pasos-title {
+    margin: 0;
+    font-size: clamp(1.75rem, 4.2vw, 3rem);
+    color: var(--color-bone);
+    max-width: 18ch;
+  }
+
+  .pasos-lede {
+    margin: 0;
+    font-size: clamp(0.9375rem, 1.15vw, 1.0625rem);
+    color: var(--color-bone-dim);
+  }
+
+  .pasos-grid {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    display: grid;
+    gap: 1.25rem 1.5rem;
+  }
+
+  .paso {
+    display: grid;
+    grid-template-columns: auto 1fr;
+    align-items: start;
+    column-gap: 0.9rem;
+    row-gap: 0.3rem;
+    padding-top: 1.1rem;
+    border-top: var(--stroke-thin) solid var(--color-rule);
+  }
+
+  .paso-mark {
+    grid-row: 1 / span 2;
+    display: grid;
+    place-items: center;
+    width: 2.6rem;
+    height: 2.6rem;
+    border-radius: var(--radius-lg);
+    background: color-mix(in oklab, var(--color-emerald) 16%, transparent);
+    border: var(--stroke-thin) solid color-mix(in oklab, var(--color-leaf) 30%, transparent);
+    /* The step's place in the run is readable as colour, the way the line is. */
+    color: color-mix(
+      in oklab,
+      var(--color-lime) calc(var(--i) * 20%),
+      var(--color-emerald)
+    );
+  }
+
+  .paso-num {
+    grid-column: 2;
+    margin: 0;
+    font-size: 0.625rem;
+    color: var(--color-bone-mute);
+    align-self: center;
+  }
+
+  .paso-name {
+    grid-column: 2;
+    margin: 0;
+    font-size: 1.0625rem;
+    color: var(--color-bone);
+    align-self: center;
+  }
+
+  .paso-headline {
+    grid-column: 1 / -1;
+    margin: 0.5rem 0 0;
+    font-weight: 500;
+    font-size: 0.9375rem;
+    line-height: 1.35;
+    color: var(--color-leaf);
+  }
+
+
+  @media (min-width: 40rem) {
+    .pasos-grid {
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+  }
+
+  @media (min-width: 68rem) {
+    .pasos-grid {
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+    }
+    .pasos-title {
+      font-size: clamp(2rem, 3.4vw, 3rem);
+    }
+  }
+</style>

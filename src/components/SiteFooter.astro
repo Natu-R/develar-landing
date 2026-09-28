@@ -1,0 +1,79 @@
+---
+import BrandMark from "./BrandMark.astro";
+import { SITE, whatsappHref } from "../data/site";
+
+const year = new Date().getFullYear();
+---
+
+<footer class="foot">
+  <div class="foot-brand">
+    <BrandMark size={26} id="foot" />
+    <span class="sign-sm foot-word">Develar</span>
+  </div>
+
+  <p class="note foot-line">{SITE.tagline}</p>
+
+  <nav class="plate foot-nav" aria-label="Pie">
+    <a href={whatsappHref} rel="noopener">WhatsApp</a>
+    <a href="#top">Volver al origen</a>
+  </nav>
+
+  <p class="plate foot-legal">© {year} Develar</p>
+</footer>
+
+<style>
+  .foot {
+    display: grid;
+    gap: 1.1rem;
+    padding: clamp(2rem, 5vh, 3rem) var(--gutter) clamp(2.5rem, 6vh, 4rem);
+    border-top: var(--stroke-thin) solid var(--color-rule);
+    background: var(--color-ink-deep);
+  }
+
+  .foot-brand {
+    display: flex;
+    align-items: center;
+    gap: 0.6rem;
+  }
+
+  .foot-word {
+    font-size: 0.9375rem;
+    letter-spacing: 0.06em;
+    color: var(--color-bone);
+  }
+
+  .foot-line,
+  .foot-legal {
+    margin: 0;
+    font-size: 0.6875rem;
+    color: var(--color-bone-mute);
+  }
+
+  .foot-nav {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 1.4rem;
+    font-size: 0.6875rem;
+  }
+
+  .foot-nav a {
+    color: var(--color-bone-dim);
+    text-decoration: none;
+    border-bottom: var(--stroke-thin) solid var(--color-rule);
+    padding-bottom: 0.15rem;
+  }
+
+  .foot-nav a:hover,
+  .foot-nav a:focus-visible {
+    color: var(--color-bone);
+    border-bottom-color: var(--color-lime);
+  }
+
+  @media (min-width: 48rem) {
+    .foot {
+      grid-template-columns: auto minmax(0, 1fr) auto auto;
+      align-items: center;
+      gap: 2.5rem;
+    }
+  }
+</style>

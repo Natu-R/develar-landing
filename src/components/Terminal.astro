@@ -1,0 +1,108 @@
+---
+import TicketCta from "./TicketCta.astro";
+import ContactForm from "./ContactForm.astro";
+---
+
+<section class="terminal" id="hablemos">
+  <div class="terminal-grid">
+    <div class="terminal-text">
+      <h2 class="sign terminal-title">Corre un contacto tuyo por el sistema.</h2>
+
+      <p class="terminal-body prose-line">
+        Lo armamos con una campaña tuya y te mostramos el recorrido completo, de
+        punta a punta.
+      </p>
+
+      <ul class="terminal-needs note">
+        <li><span class="terminal-mark" aria-hidden="true"></span>Un pixel de Meta</li>
+        <li><span class="terminal-mark" aria-hidden="true"></span>Un número de WhatsApp</li>
+        <li><span class="terminal-mark" aria-hidden="true"></span>Una página o una campaña corriendo</li>
+      </ul>
+
+      <div class="terminal-direct">
+        <p class="note terminal-direct-line">¿Prefieres sin formulario?</p>
+        <TicketCta label="Escríbenos directo" />
+      </div>
+    </div>
+
+    <ContactForm />
+  </div>
+</section>
+
+<style>
+  .terminal {
+    position: relative;
+    padding-block: clamp(2.75rem, 7vh, 4.5rem) clamp(3rem, 8vh, 5rem);
+    border-top: var(--stroke-thin) solid var(--color-rule);
+  }
+
+  .terminal-grid {
+    display: grid;
+    gap: clamp(2rem, 4vw, 3.5rem);
+    align-items: start;
+  }
+
+  .terminal-text {
+    display: grid;
+    gap: 1.25rem;
+    justify-items: start;
+    align-content: start;
+  }
+
+  .terminal-title {
+    margin: 0;
+    font-size: clamp(1.9rem, 4.4vw, 3.1rem);
+    color: var(--color-bone);
+    max-width: 16ch;
+  }
+
+  .terminal-body {
+    margin: 0;
+    font-size: clamp(0.9375rem, 1.15vw, 1.0625rem);
+    color: var(--color-bone-dim);
+  }
+
+  /* Three requirements, not three steps: they carry the line's node mark,
+     never a running order the reader would have to obey. */
+  .terminal-needs {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    display: grid;
+    gap: 0.55rem;
+  }
+
+  .terminal-needs li {
+    display: flex;
+    align-items: center;
+    gap: 0.7rem;
+  }
+
+  .terminal-mark {
+    width: 7px;
+    height: 7px;
+    flex: none;
+    border-radius: var(--radius-pill);
+    background: var(--color-leaf);
+  }
+
+  .terminal-direct {
+    display: grid;
+    gap: 0.7rem;
+    justify-items: start;
+    margin-top: 0.5rem;
+    padding-top: 1.25rem;
+    border-top: var(--stroke-thin) solid var(--color-rule);
+    width: 100%;
+  }
+
+  .terminal-direct-line {
+    margin: 0;
+  }
+
+  @media (min-width: 62rem) {
+    .terminal-grid {
+      grid-template-columns: minmax(0, 0.9fr) minmax(0, 1.1fr);
+    }
+  }
+</style>

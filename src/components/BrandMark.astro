@@ -1,0 +1,57 @@
+---
+/**
+ * The Develar mark, as supplied: a glass ring with a speech bubble cut out of
+ * it, lit from pine at the top through emerald to pale lime at the bubble's
+ * tail. Source `~/Downloads/LOGO DEVELAR FINAL.png` (3072²), resized only.
+ *
+ * It is a glow rendered on black, so it ships opaque and is screened onto the
+ * page. Screen drops the file's own ground exactly and keeps the halo, where a
+ * colour-keyed cutout would leave a ring of dirt around the specular edge.
+ */
+interface Props {
+  size?: number;
+  class?: string;
+  /** Decorative beside a wordmark; labelled when it stands alone. */
+  alt?: string;
+  loading?: "eager" | "lazy";
+  /** Accepted and ignored — the mark is a raster now, so ids no longer collide. */
+  id?: string;
+}
+
+const {
+  size = 40,
+  class: className = "",
+  alt = "",
+  loading = "eager",
+} = Astro.props;
+
+// Serve the smallest PNG that still covers a 2× screen.
+const src =
+  size <= 96
+    ? "/brand/mark-192.png"
+    : size <= 192
+      ? "/brand/mark-384.png"
+      : "/brand/mark-768.png";
+---
+
+<img
+  class={`mark ${className}`}
+  src={src}
+  width={size}
+  height={size}
+  alt={alt}
+  aria-hidden={alt ? undefined : "true"}
+  loading={loading}
+  decoding="async"
+  style={`--mark-size:${size}px`}
+/>
+
+<style>
+  .mark {
+    width: var(--mark-size);
+    height: var(--mark-size);
+    flex: none;
+    /* The file's black ground disappears against the page's own dark. */
+    mix-blend-mode: screen;
+  }
+</style>

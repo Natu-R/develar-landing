@@ -1,0 +1,161 @@
+---
+/**
+ * The history of one contact, as the dashboard shows it.
+ *
+ * This used to print transports and queue settings. Nobody buying the product
+ * operates those, and showing them suggested the buyer would have to. What is
+ * left is the same proof in the language of the person paying: where the
+ * contact came from, who answered, what they paid, and what went back to Meta.
+ *
+ * Statuses are the product's own: No contactado · Contactado · Convertido.
+ */
+import ScrollFrame from "./ScrollFrame.astro";
+
+interface Row {
+  t: string;
+  actor: string;
+  what: string;
+  detail: string;
+  /** The two rows that close the gap nobody else can measure. */
+  key?: boolean;
+}
+
+const ROWS: Row[] = [
+  { t: "21:04", actor: "Campaña", what: "Llegó desde Meta", detail: "Verano · Video 15s · Público frío" },
+  { t: "21:04", actor: "Tu página", what: "Tocó el botón", detail: "Contacto 8831 · No contactado" },
+  { t: "21:05", actor: "WhatsApp", what: "Escribió", detail: "Mensaje con su código" },
+  { t: "21:05", actor: "Sistema", what: "Lo reconoció", detail: "No contactado → Contactado", key: true },
+  { t: "21:06", actor: "Sofía", what: "Tomó la conversación", detail: "Línea ventas 02 · en turno" },
+  { t: "21:19", actor: "Sofía", what: "Registró la carga", detail: "25.000 · leído del comprobante" },
+  { t: "21:19", actor: "Meta", what: "Recibió la conversión", detail: "Atribuida a Verano · Video 15s", key: true },
+];
+---
+
+<figure class="log">
+  <ScrollFrame label="Desliza para ver el detalle" class="glass panel">
+    <table class="log-table">
+      <caption class="sr-only">
+        Historia de un contacto, del anuncio a la conversión reportada
+      </caption>
+      <thead>
+        <tr class="plate">
+          <th scope="col">Hora</th>
+          <th scope="col">Quién</th>
+          <th scope="col">Qué pasó</th>
+          <th scope="col">Detalle</th>
+        </tr>
+      </thead>
+      <tbody>
+        {
+          ROWS.map((row) => (
+            <tr class={row.key ? "is-key" : undefined}>
+              <td class="tabular log-t">{row.t}</td>
+              <td class="log-actor">{row.actor}</td>
+              <td class="log-what">{row.what}</td>
+              <td class="log-detail">{row.detail}</td>
+            </tr>
+          ))
+        }
+      </tbody>
+    </table>
+  </ScrollFrame>
+  <figcaption class="note log-caption">
+    Los dos renglones marcados son el salto que, sin código, nadie puede medir.
+    · Ejemplo
+  </figcaption>
+</figure>
+
+<style>
+  .log {
+    margin: 0.75rem 0 0;
+    display: grid;
+    gap: 1rem;
+    width: 100%;
+  }
+
+  .log-table {
+    width: 100%;
+    min-width: 34rem;
+    border-collapse: collapse;
+    font-size: 0.8125rem;
+  }
+
+  .log-table th {
+    text-align: left;
+    font-size: 0.6875rem;
+    color: var(--color-bone-mute);
+    padding: 0.8rem 1rem;
+    border-bottom: var(--stroke-thin) solid var(--color-rule);
+    font-weight: 500;
+  }
+
+  .log-table td {
+    padding: 0.7rem 1rem;
+    color: var(--color-bone-dim);
+    white-space: nowrap;
+    vertical-align: baseline;
+  }
+
+  .log-table tbody tr + tr td {
+    border-top: var(--stroke-thin) solid var(--color-rule);
+  }
+
+  .log-t {
+    color: var(--color-bone-mute);
+    font-size: 0.75rem;
+  }
+
+  .log-actor {
+    color: var(--color-bone);
+    font-weight: 500;
+  }
+
+  .log-what {
+    color: var(--color-leaf);
+  }
+
+  /* A row that matters carries the line's node mark, not a side stripe.
+     Every row reserves the mark's width so the column stays aligned. */
+  .log-t::before {
+    content: "";
+    display: inline-block;
+    width: 7px;
+    height: 7px;
+    border-radius: var(--radius-pill);
+    margin-right: 0.65rem;
+    vertical-align: 0.04em;
+  }
+
+  .is-key .log-t::before {
+    background: var(--color-lime);
+  }
+
+  .is-key td {
+    color: var(--color-bone);
+    background: color-mix(in oklab, var(--color-emerald) 14%, transparent);
+  }
+
+  .is-key .log-what {
+    color: var(--color-lime);
+  }
+
+  .log-caption {
+    max-width: 58ch;
+  }
+
+  .panel {
+    overflow: hidden;
+  }
+
+  .sr-only {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    padding: 0;
+    margin: -1px;
+    overflow: hidden;
+    clip-path: inset(50%);
+    white-space: nowrap;
+    border: 0;
+  }
+</style>

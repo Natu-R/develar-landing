@@ -1,0 +1,154 @@
+---
+/**
+ * Station 07 — the receipt read.
+ *
+ * The document is drawn in the line's own language rather than faked as a bank
+ * screenshot: redacted rules for the lines the system ignores, one live rule
+ * for the amount it extracts. Values are demonstration data.
+ */
+---
+
+<figure class="recibo">
+  <div class="recibo-pair">
+    <div class="recibo-doc" aria-hidden="true">
+      <span class="recibo-doc-head hatch"></span>
+      <span class="recibo-doc-rule" style="--w:82%"></span>
+      <span class="recibo-doc-rule" style="--w:64%"></span>
+      <span class="recibo-doc-rule recibo-doc-rule--live" style="--w:71%"></span>
+      <span class="recibo-doc-rule" style="--w:48%"></span>
+      <span class="recibo-doc-rule" style="--w:57%"></span>
+      <span class="recibo-doc-foot"></span>
+    </div>
+
+    <div class="recibo-out">
+      <dl class="recibo-fields">
+        <div>
+          <dt class="plate">Monto leído</dt>
+          <dd class="tabular recibo-amount">25.000,00</dd>
+        </div>
+        <div>
+          <dt class="plate">Contacto</dt>
+          <dd class="tabular">8831 · DV-7K2Q</dd>
+        </div>
+        <div>
+          <dt class="plate">Límite del agente</dt>
+          <dd class="tabular recibo-ok">dentro del tope</dd>
+        </div>
+        <div>
+          <dt class="plate">Conversión</dt>
+          <dd class="tabular recibo-ok">creada · Purchase enviado</dd>
+        </div>
+      </dl>
+    </div>
+  </div>
+
+  <figcaption class="note recibo-caption">
+    El sistema lee el comprobante: nadie tipea el monto. · Ejemplo ·
+    Datos de demostración
+  </figcaption>
+</figure>
+
+<style>
+  .recibo {
+    margin: 0.75rem 0 0;
+    display: grid;
+    gap: 1rem;
+    width: 100%;
+  }
+
+  .recibo-pair {
+    display: grid;
+    gap: clamp(1.25rem, 3vw, 2.5rem);
+    align-items: center;
+  }
+
+  /* The document: ticket stock with a punched foot. */
+  .recibo-doc {
+    display: grid;
+    gap: 0.7rem;
+    align-content: start;
+    width: 100%;
+    max-width: 15rem;
+    padding: 1.1rem 1.1rem 0.8rem;
+    background: var(--color-surface);
+    border: var(--stroke-thin) solid var(--color-rule);
+    border-radius: var(--radius-lg);
+  }
+
+  .recibo-doc-head {
+    height: 1.4rem;
+    width: 55%;
+  }
+
+  .recibo-doc-rule {
+    height: 5px;
+    width: var(--w);
+    border-radius: var(--radius-pill);
+    background: var(--color-rule-strong);
+  }
+
+  .recibo-doc-rule--live {
+    background-image: var(--brand-gradient);
+    height: 9px;
+    box-shadow: 0 0 16px -2px color-mix(in oklab, var(--color-leaf) 75%, transparent);
+  }
+
+  .recibo-doc-foot {
+    margin-top: 0.4rem;
+    height: 10px;
+    border-top: var(--stroke-thin) dashed var(--color-rule);
+  }
+
+  .recibo-fields {
+    display: grid;
+    gap: 0;
+    margin: 0;
+  }
+
+  .recibo-fields > div {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: baseline;
+    justify-content: space-between;
+    gap: 0.5rem 1.5rem;
+    padding: 0.75rem 0;
+    border-bottom: var(--stroke-thin) solid var(--color-rule);
+  }
+
+  .recibo-fields > div:first-child {
+    border-top: var(--stroke-thin) solid var(--color-rule);
+  }
+
+  .recibo-fields dt {
+    font-size: 0.6875rem;
+    color: var(--color-bone-mute);
+  }
+
+  .recibo-fields dd {
+    margin: 0;
+    font-size: 0.75rem;
+    color: var(--color-bone);
+  }
+
+  .recibo-amount {
+    font-size: clamp(1.35rem, 3vw, 1.85rem) !important;
+    color: var(--color-lime) !important;
+    font-weight: 600;
+    letter-spacing: -0.02em;
+  }
+
+  .recibo-ok {
+    color: var(--color-leaf) !important;
+  }
+
+  .recibo-caption {
+    max-width: 56ch;
+  }
+
+  @media (min-width: 40rem) {
+    .recibo-pair {
+      grid-template-columns: minmax(11rem, 15rem) minmax(0, 1fr);
+      align-items: start;
+    }
+  }
+</style>
