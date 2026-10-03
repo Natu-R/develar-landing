@@ -29,7 +29,7 @@ export const CAPABILITIES: Capability[] = [
     points: [
       "Varios números de WhatsApp por agente, con el tope que definas",
       "Comparativa por agente: contactos, convertidos y monto generado",
-      "Ningún contacto queda sin responder: siempre hay número de respaldo",
+      "Ningún lead queda sin ruta: si hace falta, entra el número de respaldo",
     ],
   },
   {

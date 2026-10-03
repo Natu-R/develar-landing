@@ -13,10 +13,11 @@ import EventLog from "./EventLog.astro";
 
 <section class="pasos" id="recorrido">
   <header class="pasos-head">
-    <h2 class="sign pasos-title">La venta ya entró. Meta nunca se enteró.</h2>
+    <h2 class="sign pasos-title">La venta ya entró. Ahora Meta también lo sabe.</h2>
     <p class="pasos-lede prose-line">
       Entre el click y la plata hay un salto a WhatsApp donde casi todos los
-      sistemas pierden el rastro. Esto es lo que pasa en el medio.
+      sistemas pierden el rastro. Develar carga el lead, lo asigna, registra el
+      monto y devuelve la conversión a Meta. Esto es lo que pasa en el medio.
     </p>
   </header>
 
@@ -69,26 +70,28 @@ import EventLog from "./EventLog.astro";
     padding: 0;
     display: grid;
     gap: 1.25rem 1.5rem;
+    align-items: stretch;
   }
 
   .paso {
     display: grid;
-    grid-template-columns: auto 1fr;
+    grid-template-columns: 1fr;
+    grid-template-rows: auto auto auto minmax(4.05em, 1fr);
     align-items: start;
-    column-gap: 0.9rem;
+    justify-items: center;
     row-gap: 0.3rem;
-    padding-top: 1.1rem;
+    padding: 1.1rem 0.75rem 0;
     border-top: var(--stroke-thin) solid var(--color-rule);
+    text-align: center;
   }
 
   .paso-mark {
-    grid-row: 1 / span 2;
     display: grid;
     place-items: center;
     width: 2.6rem;
     height: 2.6rem;
     border-radius: var(--radius-lg);
-    background: color-mix(in oklab, var(--color-emerald) 16%, transparent);
+    background: var(--color-ink-deep);
     border: var(--stroke-thin) solid color-mix(in oklab, var(--color-leaf) 30%, transparent);
     /* The step's place in the run is readable as colour, the way the line is. */
     color: color-mix(
@@ -99,7 +102,6 @@ import EventLog from "./EventLog.astro";
   }
 
   .paso-num {
-    grid-column: 2;
     margin: 0;
     font-size: 0.625rem;
     color: var(--color-bone-mute);
@@ -107,7 +109,6 @@ import EventLog from "./EventLog.astro";
   }
 
   .paso-name {
-    grid-column: 2;
     margin: 0;
     font-size: 1.0625rem;
     color: var(--color-bone);
@@ -115,8 +116,9 @@ import EventLog from "./EventLog.astro";
   }
 
   .paso-headline {
-    grid-column: 1 / -1;
     margin: 0.5rem 0 0;
+    width: 100%;
+    max-width: 25ch;
     font-weight: 500;
     font-size: 0.9375rem;
     line-height: 1.35;
